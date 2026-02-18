@@ -1,7 +1,14 @@
 from abc import ABC, abstractmethod
+from collections.abc import Callable
 from pathlib import Path
 
-from voct.domain.entities import AudioData, NotificationConfig, RecordingConfig, TranscriptionResult
+from voct.domain.entities import (
+    AudioData,
+    NotificationConfig,
+    RecordingConfig,
+    TranscriptionResult,
+    TriggerKey,
+)
 
 
 class RecorderPort(ABC):
@@ -55,4 +62,60 @@ class NotifierPort(ABC):
     @abstractmethod
     def play_stop_sound(self, config: NotificationConfig) -> None:
         """録音終了音を再生する。"""
+        ...
+
+
+class PushToTalkRecorderPort(ABC):
+    """Push-to-Talk 録音ポート。バックグラウンド録音の開始・停止を抽象化する。"""
+
+    @abstractmethod
+    def start_recording(self, config: RecordingConfig) -> None:
+        """バックグラウンドで録音を開始する（非ブロッキング）。"""
+        ...
+
+    @abstractmethod
+    def stop_recording(self) -> AudioData:
+        """録音を停止し、収集した AudioData を同期的に返す。"""
+        ...
+
+
+class HotkeyListenerPort(ABC):
+    """ホットキーリスナーポート。グローバルキーイベント監視を抽象化する。"""
+
+    @abstractmethod
+    def start(
+        self,
+        on_press: Callable[[], None],
+        on_release: Callable[[], None],
+        trigger_key: TriggerKey,
+    ) -> None:
+        """キーリスナーをバックグラウンドで開始する（非ブロッキング）。"""
+        ...
+
+    @abstractmethod
+    def join(self) -> None:
+        """リスナースレッドの終了を待機する（ブロッキング）。"""
+        ...
+
+    @abstractmethod
+    def stop(self) -> None:
+        """リスナーを停止する。"""
+        ...
+
+
+class ClipboardPort(ABC):
+    """クリップボードポート。システムクリップボード操作を抽象化する。"""
+
+    @abstractmethod
+    def copy(self, text: str) -> None:
+        """テキストをシステムクリップボードにコピーする。"""
+        ...
+
+
+class TranscriptFilePort(ABC):
+    """文字起こしファイルポート。Markdown ファイル保存を抽象化する。"""
+
+    @abstractmethod
+    def save(self, text: str, directory: Path, filename_format: str) -> Path:
+        """文字起こし結果を Markdown ファイルとして保存し、パスを返す。"""
         ...

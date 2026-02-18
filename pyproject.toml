@@ -8,6 +8,8 @@ dependencies = [
     "sounddevice",
     "soundfile",
     "numpy",
+    "pynput",
+    "pyperclip",
 ]
 
 [project.optional-dependencies]
@@ -17,6 +19,7 @@ dev = [
 
 [project.scripts]
 voct = "voct.main:main"
+voct-ptt = "voct.ptt_main:ptt_main"
 
 [build-system]
 requires = ["hatchling"]
